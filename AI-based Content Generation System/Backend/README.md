@@ -3,7 +3,7 @@
 ## Stack
 - **FastAPI** — API framework
 - **Groq** (llama-3.3-70b) — Content generation agent
-- **Replicate** (flux-schnell) — AI image generation
+- **Hugging face ** (flux-schnell) — AI image generation
 - **Pydantic** — Request/response validation
 
 ---
@@ -22,7 +22,7 @@ cp .env.example .env
 ```
 Then open `.env` and paste your keys:
 - **GROQ_API_KEY** → Get free at https://console.groq.com/keys
-- **REPLICATE_API_TOKEN** → Get at https://replicate.com/account/api-tokens
+- **HUGGINGFACE_API_TOKEN** → Get at https://huggingface.com/account/api-tokens
 
 ### 3. Run the server
 ```bash
@@ -77,7 +77,7 @@ const response = await fetch("http://localhost:8000/generate", {
   body: JSON.stringify({ topic, audience, platforms, languages })
 });
 const data = await response.json();
-// data.image_url is now a real image from Replicate!
+// data.image_url is now a real image from HUGGING FACE!
 ```
 
 ---
@@ -87,7 +87,7 @@ const data = await response.json();
 | Task | Model | Speed |
 |------|-------|-------|
 | Content generation | Groq llama-3.3-70b-versatile | ~1–2s |
-| Image generation | Replicate flux-schnell | ~3–5s |
+| Image generation | HUGGING FACE flux-schnell | ~3–5s |
 
 ---
 
