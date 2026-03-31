@@ -308,7 +308,7 @@ export default function PostCraftAI() {
 
     try {
       // ── Call your FastAPI backend ──────────────────────────
-      const res = await fetch("http://ai-based-content-generation-system.onrender.com/generate", {
+      const res = await fetch("https://ai-based-content-generation-system.onrender.com/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ topic, audience, platforms, languages }),
