@@ -3,7 +3,7 @@
 ## Stack
 - **FastAPI** — API framework
 - **Groq** (llama-3.3-70b) — Content generation agent
-- **Hugging face ** (flux-schnell) — AI image generation
+- **Hugging face (flux-schnell)** — AI image generation
 - **Pydantic** — Request/response validation
 
 ---
