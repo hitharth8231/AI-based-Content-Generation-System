@@ -188,7 +188,7 @@ function TranslationCard({ lang, text, delay = 0 }) {
   );
 }
 
-function VisualBriefCard({ brief, delay = 0 }) {
+function AssetTextCard({ title, eyebrow, text, accent = "#7c3aed", delay = 0 }) {
   return (
     <div style={{
       background: "#fff", borderRadius: 18,
@@ -199,22 +199,60 @@ function VisualBriefCard({ brief, delay = 0 }) {
       animationDelay: `${delay}ms`,
     }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 7, color: "#7c3aed", fontFamily: "'Sora',sans-serif", fontWeight: 700, fontSize: 12 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 7, color: accent, fontFamily: "'Sora',sans-serif", fontWeight: 700, fontSize: 12 }}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" /></svg>
-          Creative visual brief
+          {title}
         </div>
-        <CopyButton text={brief} />
+        <CopyButton text={text} />
       </div>
       <div style={{
         background: "#faf7ff", border: "1.5px dashed #c4b5fd",
         borderRadius: 12, padding: "22px 18px",
       }}>
         <p style={{ margin: "0 0 8px", fontSize: 11, color: "#7c3aed", fontFamily: "'Sora',sans-serif", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em" }}>
-          Use this in Canva, Figma, or manual design
+          {eyebrow}
         </p>
         <p style={{ margin: 0, fontFamily: "'Lora',serif", fontSize: 13.5, fontStyle: "italic", color: "#4c1d95", lineHeight: 1.75, whiteSpace: "pre-wrap" }}>
-          "{brief}"
+          "{text}"
         </p>
+      </div>
+    </div>
+  );
+}
+
+function ListCard({ title, items = [], accent = "#0f766e", delay = 0 }) {
+  const text = items.map((item, index) => `${index + 1}. ${item}`).join("\n");
+  return (
+    <div style={{
+      background: "#fff", borderRadius: 18,
+      border: "1.5px solid #d1fae5",
+      padding: "18px 20px", marginBottom: 14,
+      boxShadow: "0 2px 16px #0f766e0d",
+      animation: `pcslide 0.45s ease both`,
+      animationDelay: `${delay}ms`,
+    }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 7, color: accent, fontFamily: "'Sora',sans-serif", fontWeight: 700, fontSize: 12 }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 11l3 3L22 4" /><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" /></svg>
+          {title}
+        </div>
+        <CopyButton text={text} />
+      </div>
+      <div style={{ display: "grid", gap: 9 }}>
+        {items.map((item, index) => (
+          <div key={`${title}-${index}`} style={{
+            background: "#f0fdfa",
+            border: "1px solid #ccfbf1",
+            borderRadius: 11,
+            padding: "10px 12px",
+            fontFamily: "'Lora',serif",
+            fontSize: 13,
+            lineHeight: 1.55,
+            color: "#134e4a",
+          }}>
+            {item}
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -275,7 +313,10 @@ export default function PostCraftAI() {
         content: payload.content || {},
         translations: payload.translations || {},
         hashtags: payload.hashtags || [],
-        visual_brief: payload.visual_brief || payload.visualBrief || "",
+        image_prompt: payload.image_prompt || payload.imagePrompt || "",
+        design_brief: payload.design_brief || payload.designBrief || "",
+        cta_suggestions: payload.cta_suggestions || payload.ctaSuggestions || [],
+        posting_tips: payload.posting_tips || payload.postingTips || [],
         spelling: payload.spelling || {},
       });
       setTimeout(() => outputRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
@@ -516,7 +557,7 @@ export default function PostCraftAI() {
           <span style={{ color: "#7c3aed" }}>Ready posts out.</span>
         </h1>
         <p style={{ fontSize: 14.5, color: "#666", maxWidth: 420, margin: "0 auto", lineHeight: 1.65 }}>
-          Generate platform-perfect captions, translations, hashtags, and visual direction in seconds.
+          Generate platform captions, translations, hashtags, image prompts, CTAs, and posting tips in seconds.
         </p>
       </div>
 
@@ -598,7 +639,7 @@ export default function PostCraftAI() {
 
           {/* Flow hint */}
           <div className="pc-flow">
-            {["Topic", "->", "Groq Agent", "->", "Posts + Brief"].map((s, i) => (
+            {["Topic", "->", "Groq Agent", "->", "Content Kit"].map((s, i) => (
               <span key={i} className={s === "->" ? "pc-flow-arrow" : "pc-flow-step"}>{s}</span>
             ))}
           </div>
@@ -680,10 +721,33 @@ export default function PostCraftAI() {
                 ) : null;
               })}
 
-              {/* Visual brief */}
-              <VisualBriefCard
-                brief={result.visual_brief}
+              {/* Creative kit */}
+              <AssetTextCard
+                title="Copy-paste image prompt"
+                eyebrow="Paste into ChatGPT, DALL-E, Canva, Leonardo, or Bing Image Creator"
+                text={result.image_prompt}
                 delay={(platforms.length + languages.length) * 60}
+              />
+
+              <AssetTextCard
+                title="Design brief"
+                eyebrow="Use this for Canva, Figma, or manual design"
+                text={result.design_brief}
+                accent="#b45309"
+                delay={(platforms.length + languages.length + 1) * 60}
+              />
+
+              <ListCard
+                title="CTA suggestions"
+                items={result.cta_suggestions}
+                delay={(platforms.length + languages.length + 2) * 60}
+              />
+
+              <ListCard
+                title="Posting tips"
+                items={result.posting_tips}
+                accent="#2563eb"
+                delay={(platforms.length + languages.length + 3) * 60}
               />
 
               {/* Summary bar */}
@@ -697,7 +761,7 @@ export default function PostCraftAI() {
                   <div className="pc-divider" />
                   <span className="pc-stat">{totalPosts} total entries</span>
                   <div className="pc-divider" />
-                  <span className="pc-stat">1 visual brief</span>
+                  <span className="pc-stat">4 creative assets</span>
                 </div>
                 <button className="pc-newbtn" onClick={reset}>+ New post</button>
               </div>

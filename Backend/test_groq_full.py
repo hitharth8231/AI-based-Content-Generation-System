@@ -14,7 +14,10 @@ JSON structure:
     "LinkedIn": "Professional post here"
   },
   "hashtags": ["tag1", "tag2"],
-  "visual_brief": "A practical banner design direction"
+  "image_prompt": "A ready-to-paste image generation prompt",
+  "design_brief": "A practical banner design direction",
+  "cta_suggestions": ["Call to action one", "Call to action two", "Call to action three"],
+  "posting_tips": ["Tip one", "Tip two", "Tip three"]
 }
 """
 
@@ -71,4 +74,5 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
 

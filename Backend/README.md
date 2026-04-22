@@ -1,10 +1,10 @@
 ﻿# PostCraft AI Backend
 
-FastAPI backend for generating platform-specific social posts with Groq. The app returns captions, translations, hashtags, and a practical visual brief that can be used in Canva, Figma, or manual design.
+FastAPI backend for generating a complete social media content kit with Groq. The API returns platform captions, translations, hashtags, a copy-paste image prompt, a design brief, CTA suggestions, and posting tips.
 
 ## Stack
 - FastAPI for the API server
-- Groq chat completions for post generation
+- Groq chat completions for content generation
 - Pydantic for request and response validation
 - PySpellChecker for topic spelling correction
 
@@ -28,7 +28,7 @@ GROQ_MODEL=llama-3.1-8b-instant
 CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
 ```
 
-`GROQ_API_KEY` is required. Image generation APIs are intentionally not used; the backend returns a stable `visual_brief` instead of trying to generate an image.
+`GROQ_API_KEY` is required. The app does not call an image API; instead it returns an `image_prompt` that users can paste into ChatGPT, DALL-E, Canva, Leonardo, Bing Image Creator, or another image tool.
 
 ### 3. Run the server
 ```bash
@@ -63,7 +63,18 @@ Response:
     "Hindi": "..."
   },
   "hashtags": ["RamNavami", "Festival", "India", "Blessings", "Joy"],
-  "visual_brief": "Create a clean social media banner with a bold headline, warm colors, and festive visual elements...",
+  "image_prompt": "Create a festive social media banner for Ram Navami...",
+  "design_brief": "Use saffron and gold colors, devotional mood, clean spacing...",
+  "cta_suggestions": [
+    "Share your wishes in the comments.",
+    "Save this post for later.",
+    "Tag someone who celebrates this festival."
+  ],
+  "posting_tips": [
+    "Use the Instagram caption with a bright festive visual.",
+    "Keep LinkedIn hashtags limited to the most relevant 3 to 5 tags.",
+    "Reply quickly to early comments to improve engagement."
+  ],
   "spelling": {
     "original": "Ram Navami wishes",
     "corrected": "Ram Navami wishes",
@@ -71,6 +82,19 @@ Response:
     "suggestions": {}
   }
 }
+```
+
+## Frontend Flow
+
+```text
+Topic + audience + platforms + languages
+-> Groq content kit generation
+-> Captions and translations
+-> Hashtags
+-> Copy-paste image prompt
+-> Design brief
+-> CTA suggestions
+-> Posting tips
 ```
 
 ## Frontend Connection
