@@ -16,9 +16,9 @@ load_dotenv()
 
 SUPPORTED_PLATFORMS = {"LinkedIn", "Instagram", "Twitter", "Facebook"}
 SUPPORTED_LANGUAGES = {"English", "Hindi", "Hinglish", "Bengali", "Tamil"}
-MIN_CAPTION_WORDS = 10
+MIN_CAPTION_WORDS = 35
 GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.1-8b-instant")
-HF_IMAGE_MODEL = os.getenv("HF_IMAGE_MODEL", "runwayml/stable-diffusion-v1-5")
+HF_IMAGE_MODEL = os.getenv("HF_IMAGE_MODEL", "stabilityai/stable-diffusion-2-1")
 
 
 def get_cors_origins() -> list[str]:
@@ -52,6 +52,7 @@ class GenerateResponse(BaseModel):
     hashtags: list[str]
     image_prompt: str
     image_url: str | None = None
+    image_error: str | None = None
     spelling: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -65,7 +66,7 @@ STRICT RULES:
 - Close all quotes properly
 - Only include the requested platforms
 - Only include the requested non-English translations
-- Every platform caption in "content" must be at least 10 words long
+- Every platform caption in "content" must be at least 35 words long
 
 Format:
 {
@@ -149,7 +150,9 @@ def ensure_minimum_caption_length(content: dict[str, Any], topic: str, audience:
         text = str(caption).strip()
         if count_words(text) < MIN_CAPTION_WORDS:
             text = (
-                f"{text} Discover practical ideas about {topic} created for {audience} today."
+                f"{text} Explore {topic} with a clear, useful perspective created for {audience}. "
+                "This caption highlights the key idea, builds interest, encourages action, "
+                "and gives the audience a practical reason to engage with the post today."
             ).strip()
         cleaned[platform] = text
 
@@ -167,7 +170,7 @@ Topic: {topic}
 Audience: {audience}
 Platforms: {", ".join(platforms)}
 Languages: {", ".join(requested_translations) if requested_translations else "None"}
-Minimum caption length: every requested platform caption must contain at least 10 words.
+Minimum caption length: every requested platform caption must contain at least 35 words.
 Return only JSON.
 """
 
@@ -211,11 +214,14 @@ Return only JSON.
     return parsed
 
 
-def generate_image_huggingface(prompt: str) -> str | None:
+def is_configured_secret(value: str | None, placeholder: str) -> bool:
+    return bool(value and value.strip() and value.strip() != placeholder)
+
+
+def generate_image_huggingface(prompt: str) -> tuple[str | None, str | None]:
     hf_token = os.getenv("HF_TOKEN")
-    if not hf_token:
-        print("HF_TOKEN is not configured; returning image prompt only.")
-        return None
+    if not is_configured_secret(hf_token, "replace_with_your_hugging_face_token"):
+        return None, "HF_TOKEN is not configured in Backend/.env."
 
     try:
         from huggingface_hub import InferenceClient
@@ -226,10 +232,11 @@ def generate_image_huggingface(prompt: str) -> str | None:
         buffer = io.BytesIO()
         image.save(buffer, format="PNG")
         encoded = base64.b64encode(buffer.getvalue()).decode("utf-8")
-        return f"data:image/png;base64,{encoded}"
+        return f"data:image/png;base64,{encoded}", None
     except Exception as exc:
-        print("Hugging Face image generation failed:", exc)
-        return None
+        message = f"Hugging Face image generation failed: {exc}"
+        print(message)
+        return None, message
 
 
 @app.get("/")
@@ -249,7 +256,12 @@ async def generate(req: GenerateRequest) -> GenerateResponse:
     spelling = check_and_correct_topic(topic_input)
     parsed = generate_content(spelling["corrected"], req.audience, platforms, languages)
     image_prompt = parsed.get("image_prompt", "")
-    image_url = generate_image_huggingface(image_prompt) if image_prompt else None
+    image_url = None
+    image_error = None
+    if image_prompt:
+        image_url, image_error = generate_image_huggingface(image_prompt)
+    else:
+        image_error = "Groq did not return an image prompt."
 
     return GenerateResponse(
         content=parsed.get("content", {}),
@@ -257,5 +269,6 @@ async def generate(req: GenerateRequest) -> GenerateResponse:
         hashtags=parsed.get("hashtags", []),
         image_prompt=image_prompt,
         image_url=image_url,
+        image_error=image_error,
         spelling=spelling,
     )

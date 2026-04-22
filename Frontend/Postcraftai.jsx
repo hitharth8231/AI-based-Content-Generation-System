@@ -188,7 +188,7 @@ function TranslationCard({ lang, text, delay = 0 }) {
   );
 }
 
-function ImagePromptCard({ prompt, imageUrl, delay = 0 }) {
+function ImagePromptCard({ prompt, imageUrl, imageError, delay = 0 }) {
   const [downloading, setDownloading] = useState(false);
   const download = async () => {
     if (!imageUrl) return;
@@ -254,8 +254,11 @@ function ImagePromptCard({ prompt, imageUrl, delay = 0 }) {
           <p style={{ margin: "0 0 6px", fontFamily: "'Lora',serif", fontSize: 12.5, fontStyle: "italic", color: "#6d28d9", lineHeight: 1.65 }}>
             "{prompt}"
           </p>
-          <p style={{ margin: 0, fontSize: 10, color: "#bbb", fontFamily: "'Sora',sans-serif" }}>
-            Add HF_TOKEN to auto-generate this image
+          <p style={{ margin: "0 0 6px", fontSize: 10, color: "#b45309", fontFamily: "'Sora',sans-serif", fontWeight: 700 }}>
+            Image was not generated
+          </p>
+          <p style={{ margin: 0, fontSize: 10, color: "#9a7b2f", fontFamily: "'Sora',sans-serif", lineHeight: 1.55 }}>
+            {imageError || "Check HF_TOKEN and Hugging Face image model settings in Backend/.env."}
           </p>
         </div>
       )}
@@ -326,6 +329,7 @@ export default function PostCraftAI() {
         hashtags: payload.hashtags || [],
         image_prompt: payload.image_prompt || payload.imagePrompt || "",
         image_url: payload.image_url || payload.imageUrl || null,
+        image_error: payload.image_error || payload.imageError || null,
         spelling: payload.spelling || {},
       });
 
@@ -766,6 +770,7 @@ export default function PostCraftAI() {
               <ImagePromptCard
                 prompt={result.image_prompt}
                 imageUrl={result.image_url || null}
+                imageError={result.image_error || null}
                 delay={(platforms.length + languages.length) * 60}
               />
 

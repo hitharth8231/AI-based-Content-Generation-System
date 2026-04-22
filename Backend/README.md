@@ -26,11 +26,11 @@ Set these values in `.env`:
 GROQ_API_KEY=your_groq_key
 HF_TOKEN=your_hugging_face_token
 GROQ_MODEL=llama-3.1-8b-instant
-HF_IMAGE_MODEL=runwayml/stable-diffusion-v1-5
+HF_IMAGE_MODEL=stabilityai/stable-diffusion-2-1
 CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
 ```
 
-`GROQ_API_KEY` is required. `HF_TOKEN` is optional; without it the API still returns content and an image prompt, but `image_url` will be `null`.
+`GROQ_API_KEY` is required. `HF_TOKEN` is optional; without it the API still returns content and an image prompt, but `image_url` will be `null` and `image_error` will explain why.
 
 ### 3. Run the server
 ```bash
@@ -67,6 +67,7 @@ Response:
   "hashtags": ["RamNavami", "Festival", "India", "Blessings", "Joy"],
   "image_prompt": "A vibrant saffron-themed Ram Navami banner...",
   "image_url": null,
+  "image_error": "HF_TOKEN is not configured in Backend/.env.",
   "spelling": {
     "original": "Ram Navami wishes",
     "corrected": "Ram Navami wishes",

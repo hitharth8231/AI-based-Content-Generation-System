@@ -11,7 +11,12 @@ def test_short_platform_captions_are_expanded():
 
 
 def test_long_platform_captions_are_preserved():
-    caption = "This useful caption already has enough words for every platform preview."
+    caption = (
+        "This useful caption already has enough words for every platform preview, "
+        "with clear context, audience value, a practical angle, and enough detail "
+        "to feel complete inside the generated social media output while still "
+        "remaining natural, readable, polished, audience-focused, and ready to publish."
+    )
 
     result = ensure_minimum_caption_length({"Instagram": caption}, "AI", "Creators")
 
