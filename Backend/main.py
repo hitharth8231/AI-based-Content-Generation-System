@@ -1,6 +1,4 @@
-﻿import base64
-import io
-import json
+﻿import json
 import os
 import re
 from typing import Any
@@ -18,7 +16,6 @@ SUPPORTED_PLATFORMS = {"LinkedIn", "Instagram", "Twitter", "Facebook"}
 SUPPORTED_LANGUAGES = {"English", "Hindi", "Hinglish", "Bengali", "Tamil"}
 MIN_CAPTION_WORDS = 35
 GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.1-8b-instant")
-HF_IMAGE_MODEL = os.getenv("HF_IMAGE_MODEL", "stabilityai/stable-diffusion-2-1")
 
 
 def get_cors_origins() -> list[str]:
@@ -50,9 +47,7 @@ class GenerateResponse(BaseModel):
     content: dict[str, Any]
     translations: dict[str, Any]
     hashtags: list[str]
-    image_prompt: str
-    image_url: str | None = None
-    image_error: str | None = None
+    visual_brief: str
     spelling: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -67,6 +62,7 @@ STRICT RULES:
 - Only include the requested platforms
 - Only include the requested non-English translations
 - Every platform caption in "content" must be at least 35 words long
+- "visual_brief" must be a practical banner/design direction, not an image URL
 
 Format:
 {
@@ -83,7 +79,7 @@ Format:
     "Tamil": "..."
   },
   "hashtags": ["tag1", "tag2", "tag3", "tag4", "tag5"],
-  "image_prompt": "..."
+  "visual_brief": "A short design brief with layout, colors, mood, main text, and visual elements."
 }
 """
 
@@ -159,6 +155,17 @@ def ensure_minimum_caption_length(content: dict[str, Any], topic: str, audience:
     return cleaned
 
 
+def build_visual_brief(topic: str, audience: str, fallback: str = "") -> str:
+    if fallback.strip():
+        return fallback.strip()
+
+    return (
+        f"Create a clean social media banner for '{topic}' aimed at {audience}. "
+        "Use a bold headline, one short supporting line, high contrast colors, soft background shapes, "
+        "and enough empty space for readability. Keep the mood polished, modern, and shareable."
+    )
+
+
 def generate_content(topic: str, audience: str, platforms: list[str], languages: list[str]) -> dict[str, Any]:
     groq_key = os.getenv("GROQ_API_KEY")
     if not groq_key:
@@ -171,6 +178,7 @@ Audience: {audience}
 Platforms: {", ".join(platforms)}
 Languages: {", ".join(requested_translations) if requested_translations else "None"}
 Minimum caption length: every requested platform caption must contain at least 35 words.
+Return a useful visual_brief for designing a banner in Canva/Figma/manual design. Do not generate an image URL.
 Return only JSON.
 """
 
@@ -207,36 +215,16 @@ Return only JSON.
             "content": ensure_minimum_caption_length({platforms[0]: raw[:300]}, topic, audience),
             "translations": {},
             "hashtags": [],
-            "image_prompt": "",
+            "visual_brief": build_visual_brief(topic, audience),
         }
 
     parsed["content"] = ensure_minimum_caption_length(parsed.get("content", {}), topic, audience)
+    parsed["visual_brief"] = build_visual_brief(
+        topic,
+        audience,
+        parsed.get("visual_brief") or "",
+    )
     return parsed
-
-
-def is_configured_secret(value: str | None, placeholder: str) -> bool:
-    return bool(value and value.strip() and value.strip() != placeholder)
-
-
-def generate_image_huggingface(prompt: str) -> tuple[str | None, str | None]:
-    hf_token = os.getenv("HF_TOKEN")
-    if not is_configured_secret(hf_token, "replace_with_your_hugging_face_token"):
-        return None, "HF_TOKEN is not configured in Backend/.env."
-
-    try:
-        from huggingface_hub import InferenceClient
-
-        client = InferenceClient(api_key=hf_token)
-        image = client.text_to_image(prompt, model=HF_IMAGE_MODEL)
-
-        buffer = io.BytesIO()
-        image.save(buffer, format="PNG")
-        encoded = base64.b64encode(buffer.getvalue()).decode("utf-8")
-        return f"data:image/png;base64,{encoded}", None
-    except Exception as exc:
-        message = f"Hugging Face image generation failed: {exc}"
-        print(message)
-        return None, message
 
 
 @app.get("/")
@@ -255,20 +243,11 @@ async def generate(req: GenerateRequest) -> GenerateResponse:
 
     spelling = check_and_correct_topic(topic_input)
     parsed = generate_content(spelling["corrected"], req.audience, platforms, languages)
-    image_prompt = parsed.get("image_prompt", "")
-    image_url = None
-    image_error = None
-    if image_prompt:
-        image_url, image_error = generate_image_huggingface(image_prompt)
-    else:
-        image_error = "Groq did not return an image prompt."
 
     return GenerateResponse(
         content=parsed.get("content", {}),
         translations=parsed.get("translations", {}),
         hashtags=parsed.get("hashtags", []),
-        image_prompt=image_prompt,
-        image_url=image_url,
-        image_error=image_error,
+        visual_brief=parsed.get("visual_brief", build_visual_brief(spelling["corrected"], req.audience)),
         spelling=spelling,
     )

@@ -1,6 +1,6 @@
-import { useState, useRef } from "react";
+﻿import { useState, useRef } from "react";
 
-/* ─── Constants ─────────────────────────────────────────── */
+/* â”€â”€â”€ Constants â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 const PLATFORMS = ["LinkedIn", "Instagram", "Twitter", "Facebook"];
 const LANGUAGES = ["English", "Hindi", "Hinglish", "Bengali", "Tamil"];
 const AUDIENCES = ["General Public", "Students", "Professionals", "Entrepreneurs", "Youth", "Creators"];
@@ -38,7 +38,7 @@ const PLATFORM_ICONS = {
   ),
 };
 
-/* ─── Small reusable components ─────────────────────────── */
+/* â”€â”€â”€ Small reusable components â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 function SparkleIcon({ size = 16 }) {
   return (
@@ -188,24 +188,7 @@ function TranslationCard({ lang, text, delay = 0 }) {
   );
 }
 
-function ImagePromptCard({ prompt, imageUrl, imageError, delay = 0 }) {
-  const [downloading, setDownloading] = useState(false);
-  const download = async () => {
-    if (!imageUrl) return;
-    setDownloading(true);
-    try {
-      const res = await fetch(imageUrl);
-      const blob = await res.blob();
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = "postcraft-banner.webp";
-      a.click();
-    } catch {
-      window.open(imageUrl, "_blank");
-    }
-    setDownloading(false);
-  };
-
+function VisualBriefCard({ brief, delay = 0 }) {
   return (
     <div style={{
       background: "#fff", borderRadius: 18,
@@ -218,61 +201,26 @@ function ImagePromptCard({ prompt, imageUrl, imageError, delay = 0 }) {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 7, color: "#7c3aed", fontFamily: "'Sora',sans-serif", fontWeight: 700, fontSize: 12 }}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" /></svg>
-          AI-generated banner
+          Creative visual brief
         </div>
-        {imageUrl && (
-          <button onClick={download} disabled={downloading} style={{
-            display: "inline-flex", alignItems: "center", gap: 5,
-            background: "#7c3aed", color: "#fff", border: "none",
-            borderRadius: 8, padding: "5px 14px",
-            fontSize: 11, fontWeight: 700, cursor: downloading ? "wait" : "pointer",
-            fontFamily: "'Sora',sans-serif", opacity: downloading ? 0.7 : 1,
-          }}>
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
-            {downloading ? "Saving..." : "Download"}
-          </button>
-        )}
+        <CopyButton text={brief} />
       </div>
-
-      {imageUrl ? (
-        <img src={imageUrl} alt="Generated banner" style={{
-          width: "100%", borderRadius: 12, display: "block",
-          border: "1px solid #ede8ff", objectFit: "cover", maxHeight: 320,
-        }} />
-      ) : (
-        <div style={{
-          background: "#faf7ff", border: "1.5px dashed #c4b5fd",
-          borderRadius: 12, padding: "24px 18px", textAlign: "center",
-        }}>
-          <div style={{
-            width: 44, height: 44, background: "#ede8ff", borderRadius: 12,
-            display: "flex", alignItems: "center", justifyContent: "center",
-            margin: "0 auto 10px",
-          }}>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="1.8"><path d="M12 2L2 7l10 5 10-5-10-5z" /><path d="M2 17l10 5 10-5" /><path d="M2 12l10 5 10-5" /></svg>
-          </div>
-          <p style={{ margin: "0 0 6px", fontFamily: "'Lora',serif", fontSize: 12.5, fontStyle: "italic", color: "#6d28d9", lineHeight: 1.65 }}>
-            "{prompt}"
-          </p>
-          <p style={{ margin: "0 0 6px", fontSize: 10, color: "#b45309", fontFamily: "'Sora',sans-serif", fontWeight: 700 }}>
-            Image was not generated
-          </p>
-          <p style={{ margin: 0, fontSize: 10, color: "#9a7b2f", fontFamily: "'Sora',sans-serif", lineHeight: 1.55 }}>
-            {imageError || "Check HF_TOKEN and Hugging Face image model settings in Backend/.env."}
-          </p>
-        </div>
-      )}
-
-      {imageUrl && (
-        <p style={{ margin: "10px 0 0", fontSize: 10.5, color: "#bbb", fontFamily: "'Sora',sans-serif", fontStyle: "italic" }}>
-          Prompt: {prompt}
+      <div style={{
+        background: "#faf7ff", border: "1.5px dashed #c4b5fd",
+        borderRadius: 12, padding: "22px 18px",
+      }}>
+        <p style={{ margin: "0 0 8px", fontSize: 11, color: "#7c3aed", fontFamily: "'Sora',sans-serif", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+          Use this in Canva, Figma, or manual design
         </p>
-      )}
+        <p style={{ margin: 0, fontFamily: "'Lora',serif", fontSize: 13.5, fontStyle: "italic", color: "#4c1d95", lineHeight: 1.75, whiteSpace: "pre-wrap" }}>
+          "{brief}"
+        </p>
+      </div>
     </div>
   );
 }
 
-/* ─── Main App ───────────────────────────────────────────── */
+/* â”€â”€â”€ Main App â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 export default function PostCraftAI() {
   const [topic, setTopic] = useState("");
   const [audience, setAudience] = useState("General Public");
@@ -327,43 +275,9 @@ export default function PostCraftAI() {
         content: payload.content || {},
         translations: payload.translations || {},
         hashtags: payload.hashtags || [],
-        image_prompt: payload.image_prompt || payload.imagePrompt || "",
-        image_url: payload.image_url || payload.imageUrl || null,
-        image_error: payload.image_error || payload.imageError || null,
+        visual_brief: payload.visual_brief || payload.visualBrief || "",
         spelling: payload.spelling || {},
       });
-
-      // Optional direct-provider fallback kept disabled for safety.
-      // const response = await fetch("https://api.anthropic.com/v1/messages", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({
-      //     model: "claude-sonnet-4-20250514",
-      //     max_tokens: 1500,
-      //     system: `You are an expert social media content creator. Generate engaging, platform-optimized content.
-      // Respond ONLY with a valid JSON object - no markdown, no backticks, no explanation.
-      // Structure:
-      // {
-      //   "content": { "LinkedIn": "...", "Instagram": "...", "Twitter": "...", "Facebook": "..." },
-      //   "translations": { "Hindi": "...", "Hinglish": "...", "Bengali": "...", "Tamil": "..." },
-      //   "hashtags": ["tag1","tag2","tag3","tag4","tag5"],
-      //   "image_prompt": "vivid 60-word description for image generation"
-      // }
-      // Rules per platform - LinkedIn: professional 150-300 words with CTA; Instagram: emoji-rich casual under 150 words; Twitter: punchy under 280 chars; Facebook: warm community 100-200 words.
-      // Only include requested platforms and requested non-English languages.`,
-      //     messages: [{
-      //       role: "user",
-      //       content: `Topic: ${topic}\nAudience: ${audience}\nPlatforms: ${platforms.join(", ")}\nLanguages: ${languages.join(", ")}`,
-      //     }],
-      //   }),
-      // });
-
-      // const raw = await response.json();
-      // const text = raw.content?.find(b => b.type === "text")?.text || "";
-      // const clean = text.replace(/```json|```/g, "").trim();
-      // const parsed = JSON.parse(clean);
-      // setResult(parsed);
-
       setTimeout(() => outputRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
     } catch (e) {
       console.error(e);
@@ -558,7 +472,7 @@ export default function PostCraftAI() {
         }
       `}</style>
 
-      {/* ── Topbar ── */}
+      {/* â”€â”€ Topbar â”€â”€ */}
       <nav className="pc-topbar">
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{
@@ -577,11 +491,11 @@ export default function PostCraftAI() {
           background: "#f5f3ff", border: "1px solid #ede8ff",
           borderRadius: 999, padding: "4px 14px",
         }}>
-          Powered by Groq + Hugging Face
+          Powered by Groq
         </span>
       </nav>
 
-      {/* ── Hero ── */}
+      {/* â”€â”€ Hero â”€â”€ */}
       <div className="pc-hero">
         <div style={{
           display: "inline-block",
@@ -602,14 +516,14 @@ export default function PostCraftAI() {
           <span style={{ color: "#7c3aed" }}>Ready posts out.</span>
         </h1>
         <p style={{ fontSize: 14.5, color: "#666", maxWidth: 420, margin: "0 auto", lineHeight: 1.65 }}>
-          Generate platform-perfect content + AI visuals for every occasion in seconds.
+          Generate platform-perfect captions, translations, hashtags, and visual direction in seconds.
         </p>
       </div>
 
-      {/* ── Main grid ── */}
+      {/* â”€â”€ Main grid â”€â”€ */}
       <div className="pc-main">
 
-        {/* ── Input Card ── */}
+        {/* â”€â”€ Input Card â”€â”€ */}
         <div className="pc-input-card">
           <p style={{ fontWeight: 700, fontSize: 16, color: "#1a1a2e", marginBottom: 22 }}>Create content</p>
 
@@ -684,13 +598,13 @@ export default function PostCraftAI() {
 
           {/* Flow hint */}
           <div className="pc-flow">
-            {["Topic", "->", "Groq Agent", "->", "Posts + Image"].map((s, i) => (
+            {["Topic", "->", "Groq Agent", "->", "Posts + Brief"].map((s, i) => (
               <span key={i} className={s === "->" ? "pc-flow-arrow" : "pc-flow-step"}>{s}</span>
             ))}
           </div>
         </div>
 
-        {/* ── Output Panel ── */}
+        {/* â”€â”€ Output Panel â”€â”€ */}
         <div ref={outputRef}>
           {!result && !loading && (
             <div className="pc-empty">
@@ -766,11 +680,9 @@ export default function PostCraftAI() {
                 ) : null;
               })}
 
-              {/* Image card */}
-              <ImagePromptCard
-                prompt={result.image_prompt}
-                imageUrl={result.image_url || null}
-                imageError={result.image_error || null}
+              {/* Visual brief */}
+              <VisualBriefCard
+                brief={result.visual_brief}
                 delay={(platforms.length + languages.length) * 60}
               />
 
@@ -785,7 +697,7 @@ export default function PostCraftAI() {
                   <div className="pc-divider" />
                   <span className="pc-stat">{totalPosts} total entries</span>
                   <div className="pc-divider" />
-                  <span className="pc-stat">1 image prompt</span>
+                  <span className="pc-stat">1 visual brief</span>
                 </div>
                 <button className="pc-newbtn" onClick={reset}>+ New post</button>
               </div>
@@ -796,3 +708,5 @@ export default function PostCraftAI() {
     </>
   );
 }
+
+

@@ -1,12 +1,12 @@
 ﻿# PostCraft AI Backend
 
-FastAPI backend for generating platform-specific social posts with Groq and optional AI image generation through Hugging Face Inference.
+FastAPI backend for generating platform-specific social posts with Groq. The app returns captions, translations, hashtags, and a practical visual brief that can be used in Canva, Figma, or manual design.
 
 ## Stack
 - FastAPI for the API server
 - Groq chat completions for post generation
-- Hugging Face Inference for optional image generation
 - Pydantic for request and response validation
+- PySpellChecker for topic spelling correction
 
 ## Setup
 
@@ -24,13 +24,11 @@ cp .env.example .env
 Set these values in `.env`:
 ```env
 GROQ_API_KEY=your_groq_key
-HF_TOKEN=your_hugging_face_token
 GROQ_MODEL=llama-3.1-8b-instant
-HF_IMAGE_MODEL=stabilityai/stable-diffusion-2-1
 CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
 ```
 
-`GROQ_API_KEY` is required. `HF_TOKEN` is optional; without it the API still returns content and an image prompt, but `image_url` will be `null` and `image_error` will explain why.
+`GROQ_API_KEY` is required. Image generation APIs are intentionally not used; the backend returns a stable `visual_brief` instead of trying to generate an image.
 
 ### 3. Run the server
 ```bash
@@ -65,9 +63,7 @@ Response:
     "Hindi": "..."
   },
   "hashtags": ["RamNavami", "Festival", "India", "Blessings", "Joy"],
-  "image_prompt": "A vibrant saffron-themed Ram Navami banner...",
-  "image_url": null,
-  "image_error": "HF_TOKEN is not configured in Backend/.env.",
+  "visual_brief": "Create a clean social media banner with a bold headline, warm colors, and festive visual elements...",
   "spelling": {
     "original": "Ram Navami wishes",
     "corrected": "Ram Navami wishes",
@@ -91,7 +87,7 @@ Backend/
   requirements.txt
   .env.example
   README.md
+  test_caption_length.py
   test_groq.py
   test_groq_full.py
 ```
-
