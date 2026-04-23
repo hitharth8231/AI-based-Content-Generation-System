@@ -19,7 +19,7 @@ GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.1-8b-instant")
 
 
 def get_cors_origins() -> list[str]:
-    raw_origins = os.getenv("CORS_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173")
+    raw_origins = os.getenv("CORS_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173","https://ai-based-content-generation-system-ten.vercel.app")
     return [origin.strip() for origin in raw_origins.split(",") if origin.strip()]
 
 
