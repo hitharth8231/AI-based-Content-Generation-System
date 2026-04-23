@@ -296,7 +296,7 @@ export default function PostCraftAI() {
     setResult(null);
 
     try {
-      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+      const apiBaseUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
       const res = await fetch(`${apiBaseUrl}/generate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
