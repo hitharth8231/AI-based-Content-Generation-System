@@ -296,12 +296,23 @@ export default function PostCraftAI() {
     setResult(null);
 
     try {
-      const apiBaseUrl = import.meta.env.VITE_API_URL;
-      const res = await fetch(`${apiBaseUrl}/generate`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ topic, audience, platforms, languages }),
-      });
+     const apiBaseUrl = (
+  import.meta.env.VITE_API_URL ||
+  "https://ai-based-content-generation-system.onrender.com"
+).replace(/\/+$/, "");
+
+const res = await fetch(`${apiBaseUrl}/generate`, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    topic,
+    audience,
+    platforms,
+    languages
+  })
+});
       if (!res.ok) {
         const errData = await res.json();
         throw new Error(errData.detail || "API Error");
