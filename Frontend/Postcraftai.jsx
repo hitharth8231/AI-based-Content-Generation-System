@@ -313,11 +313,13 @@ const res = await fetch(`${apiBaseUrl}/generate`, {
     languages
   })
 });
-      if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.detail || "API Error");
-      }
-      const data = await res.json();
+     const data = await res.json().catch(() => ({}));
+
+if (!res.ok) {
+  throw new Error(
+    data.detail || `API request failed: ${res.status}`
+  );
+}
       // Support responses keyed by data/data as well as direct JSON body.
       const payload = data?.data ? data.data : data;
       setResult({
@@ -331,10 +333,13 @@ const res = await fetch(`${apiBaseUrl}/generate`, {
         spelling: payload.spelling || {},
       });
       setTimeout(() => outputRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
-    } catch (e) {
-      console.error(e);
-      setError("Something went wrong. Check your API connection and try again.");
-    } finally {
+    }catch (e) {
+  console.error("PostCraft API Error:", e);
+
+  setError(
+    e.message || "Unable to generate content. Please try again."
+  );
+} finally {
       setLoading(false);
     }
   };
