@@ -237,15 +237,19 @@ Return only JSON.
                 "Authorization": f"Bearer {groq_key}",
                 "Content-Type": "application/json",
             },
-            json={
-                "model": GROQ_MODEL,
-                "messages": [
-                    {"role": "system", "content": SYSTEM_PROMPT},
-                    {"role": "user", "content": user_message},
-                ],
-                "temperature": 0.7,
-                "response_format": {"type": "json_object"},
-            },
+           
+json={
+    "model": GROQ_MODEL,
+    "messages": [
+        {"role": "system", "content": SYSTEM_PROMPT},
+        {"role": "user", "content": user_message},
+    ],
+    "temperature": 0.7,
+    "max_completion_tokens": 8192,
+    "reasoning_format": "hidden",
+    "response_format": {"type": "json_object"},
+},
+
             timeout=60.0,
         )
         response.raise_for_status()
