@@ -15,7 +15,7 @@ load_dotenv()
 SUPPORTED_PLATFORMS = {"LinkedIn", "Instagram", "Twitter", "Facebook"}
 SUPPORTED_LANGUAGES = {"English", "Hindi", "Hinglish", "Bengali", "Tamil"}
 MIN_CAPTION_WORDS = 35
-GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+GROQ_MODEL = os.getenv("GROQ_MODEL", "openai/gpt-oss-20b")
 
 
 def get_cors_origins() -> list[str]:
